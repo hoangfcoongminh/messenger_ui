@@ -3,7 +3,6 @@ import "./App.css";
 import Sidebar from "./components/Sidebar.jsx";
 import SearchUser from "./components/SearchUser.jsx";
 import ChatRoomList from "./components/ChatRoomList.jsx";
-import CreateChatRoom from "./components/CreateChatRoom.jsx";
 import ChatRoom from "./components/ChatRoom.jsx";
 import ChatComponent from "./components/ChatComponent.jsx";
 
@@ -44,12 +43,7 @@ function App() {
     <div className="flex h-screen bg-gray-100">
       <Sidebar>
         <SearchUser onSearch={handleSearch} />
-        <CreateChatRoom onCreate={handleCreateRoom} />
-        <ChatRoomList
-          chatRooms={chatRooms}
-          onSelectRoom={handleSelectRoom}
-          selectedRoomId={selectedRoomId}
-        />
+        <ChatRoomList />
       </Sidebar>
       <main className="flex-1 flex flex-col">
         <ChatRoom room={selectedRoom}>
