@@ -4,6 +4,7 @@ import chatRoomApi from "../api/chatRoomApi";
 
 const ChatRoomList = () => {
   const [chatRooms, setChatRooms] = useState([]);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [newChatRoom, setNewChatRoom] = useState(null);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
 
@@ -47,7 +48,7 @@ const ChatRoomList = () => {
               className={`p-2 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
                 selectedRoomId === room.id ? "bg-blue-200" : ""
               }`}
-              onClick={() => onSelectRoom(room.id)}
+              onClick={() => setSelectedRoomId(room.id)}
             >
               <div className="font-medium">{room.name}</div>
             </div>

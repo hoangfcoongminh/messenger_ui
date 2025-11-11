@@ -1,23 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Sidebar from "./components/Sidebar.jsx";
 import SearchUser from "./components/SearchUser.jsx";
 import ChatRoomList from "./components/ChatRoomList.jsx";
 import ChatRoom from "./components/ChatRoom.jsx";
 import ChatComponent from "./components/ChatComponent.jsx";
-
-// Dummy data for demo
-const initialRooms = [
-  { id: "1", name: "Phòng chung" },
-  { id: "2", name: "Nhóm học React" },
-];
+import Login from "./components/Login.jsx";
+import Signup from "./components/Signup.jsx";
 
 function App() {
-  const [chatRooms, setChatRooms] = useState(initialRooms);
-  const [selectedRoomId, setSelectedRoomId] = useState(
-    chatRooms[0]?.id || null
-  );
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [showSignup, setShowSignup] = useState(false);
+
+  useEffect(() => {
+    // Lấy fullName từ localStorage khi app khởi động
+    const fullName = localStorage.getItem("fullName");
+    if (fullName) {
+      setFullName(fullName);
+    }
+  }, []);
+
+  const handleLogin = (name) => {
+    setFullName(name);
+    localStorage.setItem("fullName", name);
+    setShowSignup(false);
+  };
+
+  const handleSignup = (name) => {
+    setFullName(name);
+    localStorage.setItem("fullName", name);
+    setShowSignup(false);
+  };
+
+  const handleShowSignup = () => setShowSignup(true);
+  const handleShowLogin = () => setShowSignup(false);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -29,7 +47,7 @@ function App() {
       id: Date.now().toString(),
       name: roomName,
     };
-    setChatRooms((prev) => [...prev, newRoom]);
+    // setChatRooms((prev) => [...prev, newRoom]);
     setSelectedRoomId(newRoom.id);
   };
 
@@ -37,19 +55,42 @@ function App() {
     setSelectedRoomId(roomId);
   };
 
-  const selectedRoom = chatRooms.find((room) => room.id === selectedRoomId);
+  const handleLogout = () => {
+    localStorage.removeItem("fullName");
+    localStorage.removeItem("uid");
+    setFullName("");
+  };
+
+  if (!fullName) {
+    return showSignup ? (
+      <Signup onSignup={handleSignup} onShowLogin={handleShowLogin} />
+    ) : (
+      <Login onLogin={handleLogin} onShowSignup={handleShowSignup} />
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar>
+        <div className="mb-4 flex items-center justify-between">
+          <span className="font-semibold text-blue-700">
+            Xin chào, {fullName}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm"
+          >
+            Đăng xuất
+          </button>
+        </div>
         <SearchUser onSearch={handleSearch} />
         <ChatRoomList />
       </Sidebar>
       <main className="flex-1 flex flex-col">
-        <ChatRoom room={selectedRoom}>
-          {/* TODO: Truyền roomId vào ChatComponent để chat theo phòng */}
-          <ChatComponent />
-        </ChatRoom>
+        {/* <ChatRoom room={selectedRoom}> */}
+        {/* TODO: Truyền roomId vào ChatComponent để chat theo phòng */}
+        <ChatComponent username={fullName} />
+        {/* </ChatRoom> */}
       </main>
     </div>
   );
