@@ -1,16 +1,21 @@
-import React, { useState } from "react";
-
-// Dummy user list (thay bằng API khi cần)
-const DUMMY_USERS = [
-  { id: "u1", name: "Minh Hoàng" },
-  { id: "u2", name: "Lan Nguyễn" },
-  { id: "u3", name: "Tuấn Anh" },
-  { id: "u4", name: "Hà Phạm" },
-];
+import React, { use, useEffect, useState } from "react";
+import userApi from "../api/userApi";
+import { toast } from "react-toastify";
 
 const CreateChatRoomForm = ({ onCreate, onCancel }) => {
   const [roomName, setRoomName] = useState("");
+  const [userList, setUserList] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
+    userApi.getUsers().then((response) => {
+      setUserList(response.data);
+    });
+  };
 
   const handleToggleMember = (userId) => {
     setSelectedMembers((prev) =>
@@ -22,10 +27,12 @@ const CreateChatRoomForm = ({ onCreate, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (roomName.trim() && selectedMembers.length > 0) {
+    if (roomName.trim() && selectedMembers.length > 1) {
       onCreate({ name: roomName.trim(), members: selectedMembers });
       setRoomName("");
       setSelectedMembers([]);
+    } else {
+      toast.error("Vui lòng nhập tên phòng và chọn ít nhất 2 thành viên.");
     }
   };
 
@@ -49,20 +56,27 @@ const CreateChatRoomForm = ({ onCreate, onCancel }) => {
       <div className="mb-3">
         <label className="block mb-1 font-medium">Chọn thành viên</label>
         <div className="max-h-32 overflow-y-auto border rounded p-2 bg-gray-50">
-          {DUMMY_USERS.map((user) => (
-            <label
-              key={user.id}
-              className="flex items-center mb-1 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={selectedMembers.includes(user.id)}
-                onChange={() => handleToggleMember(user.id)}
-                className="mr-2"
-              />
-              {user.name}
-            </label>
-          ))}
+          {Array.from({ length: Math.ceil(userList.length / 2) }).map(
+            (_, rowIdx) => (
+              <div key={rowIdx} className="flex gap-4 mb-1">
+                {userList.slice(rowIdx * 2, rowIdx * 2 + 2).map((user) => (
+                  <label
+                    key={user.id}
+                    className="flex items-center cursor-pointer flex-1"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedMembers.includes(user.id)}
+                      onChange={() => handleToggleMember(user.id)}
+                      className="mr-2"
+                    />
+                    {user.fullName} (
+                    <span className="italic">{user.username}</span>)
+                  </label>
+                ))}
+              </div>
+            )
+          )}
         </div>
       </div>
       <div className="flex gap-2 mt-4">

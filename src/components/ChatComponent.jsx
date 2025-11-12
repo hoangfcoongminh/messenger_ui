@@ -1,62 +1,116 @@
-import React, { useState, useEffect } from 'react';
-import sockjs from 'sockjs-client/dist/sockjs';
-import { Client } from '@stomp/stompjs';
+import React, { useState, useEffect } from "react";
+import { connect, sendMessage, disconnect } from "../websocket/chat";
+import { toast } from "react-toastify";
+import chatMessageApi from "../api/chatMessage";
+import userApi from "../api/userApi";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
-const ChatComponent = () => {
-  const [message, setMessage] = useState('');
+dayjs.extend(relativeTime);
+
+const ChatComponent = ({ roomId }) => {
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [client, setClient] = useState(null);
+  const [userList, setUserList] = useState([]);
+  const messagesEndRef = React.useRef(null);
 
   // Khởi tạo kết nối WebSocket khi component mount
   useEffect(() => {
-    const socket = new sockjs('http://localhost:8080/ws'); // Kết nối SockJS tới endpoint của backend
-    const stompClient = new Client({
-      webSocketFactory: () => socket,
-      onConnect: () => {
-        stompClient.subscribe('/topic/messages', function (messageOutput) {
-          setMessages((prevMessages) => [...prevMessages, messageOutput.body]);
-        });
-      },
-      onStompError: function (frame) {
-        console.error('STOMP error:', frame);
-      },
+    console.log("Connecting to WebSocket for roomId: ", roomId);
+
+    fetchUsers();
+    fetchHistoryMessages(roomId);
+    connect(roomId, (msg) => {
+      setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
-    stompClient.activate();
-    setClient(stompClient);
+    // Ngắt kết nối khi component unmount
+    return () => {
+      disconnect();
+    };
+  }, [roomId]);
 
-    return () => stompClient.deactivate(); // Cleanup khi component unmount
-  }, []);
-
-  const sendMessage = () => {
-    if (client && message) {
-      client.publish({
-        destination: '/app/sendMessage',
-        body: message,
-      });
-      setMessage('');
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  }, [messages]);
+
+  const fetchUsers = () => {
+    userApi
+      .getUsers()
+      .then((response) => {
+        setUserList(response.data);
+      })
+      .catch((error) => {
+        toast.error("Lỗi khi tải danh sách người dùng");
+        console.error("Lỗi khi tải danh sách người dùng: ", error);
+      });
+  };
+
+  const fetchHistoryMessages = (id) => {
+    chatMessageApi
+      .fetchHistoryMessages(id)
+      .then((response) => {
+        setMessages(response.data);
+      })
+      .catch((error) => {
+        toast.error("Lỗi khi tải lịch sử tin nhắn");
+        console.error("Lỗi khi tải lịch sử tin nhắn: ", error);
+      });
+  };
+
+  const handleSendMessage = () => {
+    sendMessage(roomId, message);
+    setMessage("");
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-purple-700 mb-4 text-center">WebSocket Chat</h2>
+        <h2 className="text-2xl font-bold text-purple-700 mb-4 text-center">
+          WebSocket Chat
+        </h2>
         <div className="flex flex-col h-80 border rounded-lg bg-gray-50 p-4 mb-4 overflow-y-auto">
           {messages.length === 0 ? (
-            <div className="text-gray-400 text-center my-auto">Chưa có tin nhắn nào</div>
+            <div className="text-gray-400 text-center my-auto">
+              Chưa có tin nhắn nào
+            </div>
           ) : (
             messages.map((msg, index) => (
               <div
                 key={index}
-                className="mb-2 flex items-start"
+                className={`mb-2 flex ${
+                  msg.sender === localStorage.getItem("uid")
+                    ? "justify-end"
+                    : "justify-start"
+                }`}
               >
-                <div className="bg-purple-100 text-purple-800 px-3 py-2 rounded-lg shadow-sm max-w-xs">
-                  {msg}
+                <div
+                  className={`px-3 py-2 rounded-lg shadow-sm max-w-xs ${
+                    msg.sender === localStorage.getItem("uid")
+                      ? "bg-purple-600 text-white"
+                      : "bg-purple-100 text-purple-800"
+                  }`}
+                >
+                  <div className="text-xs font-semibold mb-1">
+                    {msg.sender === localStorage.getItem("uid")
+                      ? "Bạn"
+                      : userList.filter((user) => user.id === msg.sender)[0]
+                          ?.fullName}
+                  </div>
+                  <div className="text-left">{msg.message}</div>
                 </div>
+                <span
+                  className="ml-2 text-[0.65rem] text-gray-500"
+                  title={dayjs(msg.timestamp).format("HH:mm DD/MM/YYYY")}
+                >
+                  {dayjs(msg.timestamp).fromNow()}
+                </span>
               </div>
             ))
           )}
+          <div ref={messagesEndRef} />
         </div>
         <div className="flex gap-2">
           <input
@@ -65,9 +119,14 @@ const ChatComponent = () => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Nhập tin nhắn..."
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSendMessage();
+              }
+            }}
           />
           <button
-            onClick={sendMessage}
+            onClick={handleSendMessage}
             className="px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
           >
             Gửi

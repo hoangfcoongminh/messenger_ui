@@ -2,30 +2,31 @@ import React, { useEffect, useState } from "react";
 import CreateChatRoomForm from "./CreateChatRoomForm";
 import chatRoomApi from "../api/chatRoomApi";
 
-const ChatRoomList = () => {
+const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
   const [chatRooms, setChatRooms] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [newChatRoom, setNewChatRoom] = useState(null);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
 
   useEffect(() => {
+    const fetchChatRooms = () => {
+      chatRoomApi
+        .getChatRooms()
+        .then((response) => {
+          setChatRooms(response.data);
+          if (response.data.length > 0 && !selectedRoomId) {
+            onSelectRoom(response.data[0].id);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching chat rooms:", error);
+        });
+    };
+
     fetchChatRooms();
-  }, []);
+  }, [onSelectRoom, selectedRoomId]);
 
-  const fetchChatRooms = () => {
+  const handleCreateRoom = (roomData) => {
     chatRoomApi
-      .getChatRooms()
-      .then((response) => {
-        setChatRooms(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching chat rooms:", error);
-      });
-  };
-
-  const handleCreateRoom = (roomName) => {
-    chatRoomApi
-      .createChatRoom({ name: roomName })
+      .createChatRoom(roomData)
       .then((response) => {
         const newRoom = response.data;
         setChatRooms((prev) => [...prev, newRoom]);
@@ -34,7 +35,7 @@ const ChatRoomList = () => {
         console.error("Error creating chat room:", error);
       });
   };
- 
+
   return (
     <>
       <div className="flex-1 overflow-y-auto">
@@ -48,14 +49,40 @@ const ChatRoomList = () => {
               className={`p-2 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
                 selectedRoomId === room.id ? "bg-blue-200" : ""
               }`}
-              onClick={() => setSelectedRoomId(room.id)}
+              onClick={() => onSelectRoom(room.id)}
             >
               <div className="font-medium">{room.name}</div>
             </div>
           ))
         )}
       </div>
-      <CreateChatRoomForm onCreate={handleCreateRoom} />
+      <div className="mt-4">
+        <button
+          className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+          onClick={() => setIsOpenCreateForm(true)}
+        >
+          Tạo phòng chat
+        </button>
+      </div>
+      {isOpenCreateForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setIsOpenCreateForm(false)}
+            >
+              ×
+            </button>
+            <CreateChatRoomForm
+              onCreate={(roomData) => {
+                handleCreateRoom(roomData);
+                setIsOpenCreateForm(false);
+              }}
+              onCancel={() => setIsOpenCreateForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

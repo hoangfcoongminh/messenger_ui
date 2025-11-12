@@ -7,6 +7,8 @@ import ChatRoom from "./components/ChatRoom.jsx";
 import ChatComponent from "./components/ChatComponent.jsx";
 import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -59,6 +61,7 @@ function App() {
     localStorage.removeItem("fullName");
     localStorage.removeItem("uid");
     setFullName("");
+    setSelectedRoomId(null);
   };
 
   if (!fullName) {
@@ -71,6 +74,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      <ToastContainer position="top-right" autoClose={3000} />
       <Sidebar>
         <div className="mb-4 flex items-center justify-between">
           <span className="font-semibold text-blue-700">
@@ -84,12 +88,15 @@ function App() {
           </button>
         </div>
         <SearchUser onSearch={handleSearch} />
-        <ChatRoomList />
+        <ChatRoomList
+          onSelectRoom={handleSelectRoom}
+          selectedRoomId={selectedRoomId}
+        />
       </Sidebar>
       <main className="flex-1 flex flex-col">
         {/* <ChatRoom room={selectedRoom}> */}
         {/* TODO: Truyền roomId vào ChatComponent để chat theo phòng */}
-        <ChatComponent username={fullName} />
+        <ChatComponent roomId={selectedRoomId} />
         {/* </ChatRoom> */}
       </main>
     </div>
