@@ -46,7 +46,7 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
           chatRooms.map((room) => (
             <div
               key={room.id}
-              className={`p-2 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
+              className={`p-2 border-2 border-black-300 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
                 selectedRoomId === room.id ? "bg-blue-200" : ""
               }`}
               onClick={() => onSelectRoom(room.id)}

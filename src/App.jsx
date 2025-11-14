@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [fullName, setFullName] = useState("");
   const [showSignup, setShowSignup] = useState(false);
 
@@ -38,20 +37,6 @@ function App() {
 
   const handleShowSignup = () => setShowSignup(true);
   const handleShowLogin = () => setShowSignup(false);
-
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    // TODO: Tìm kiếm người dùng từ backend
-  };
-
-  const handleCreateRoom = (roomName) => {
-    const newRoom = {
-      id: Date.now().toString(),
-      name: roomName,
-    };
-    // setChatRooms((prev) => [...prev, newRoom]);
-    setSelectedRoomId(newRoom.id);
-  };
 
   const handleSelectRoom = (roomId) => {
     setSelectedRoomId(roomId);
@@ -87,7 +72,7 @@ function App() {
             Đăng xuất
           </button>
         </div>
-        <SearchUser onSearch={handleSearch} />
+        <SearchUser />
         <ChatRoomList
           onSelectRoom={handleSelectRoom}
           selectedRoomId={selectedRoomId}

@@ -67,48 +67,59 @@ const ChatComponent = ({ roomId }) => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-purple-700 mb-4 text-center">
           WebSocket Chat
         </h2>
-        <div className="flex flex-col h-80 border rounded-lg bg-gray-50 p-4 mb-4 overflow-y-auto">
+        <div className="flex flex-col h-[32rem] border rounded-lg bg-gray-50 p-6 mb-4 overflow-y-auto">
           {messages.length === 0 ? (
             <div className="text-gray-400 text-center my-auto">
               Chưa có tin nhắn nào
             </div>
           ) : (
-            messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`mb-2 flex ${
-                  msg.sender === localStorage.getItem("uid")
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-              >
+            messages.map((msg, index) => {
+              const isMine = msg.sender === localStorage.getItem("uid");
+              return (
                 <div
-                  className={`px-3 py-2 rounded-lg shadow-sm max-w-xs ${
-                    msg.sender === localStorage.getItem("uid")
-                      ? "bg-purple-600 text-white"
-                      : "bg-purple-100 text-purple-800"
+                  key={index}
+                  className={`mb-2 flex ${
+                    isMine ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="text-xs font-semibold mb-1">
-                    {msg.sender === localStorage.getItem("uid")
-                      ? "Bạn"
-                      : userList.filter((user) => user.id === msg.sender)[0]
-                          ?.fullName}
+                  {isMine && (
+                    <span
+                      className="mr-2 text-[0.65rem] text-gray-500 self-end"
+                      title={dayjs(msg.timestamp).format("HH:mm DD/MM/YYYY")}
+                    >
+                      {dayjs(msg.timestamp).fromNow()}
+                    </span>
+                  )}
+                  <div
+                    className={`px-3 py-2 rounded-lg shadow-sm max-w-xs ${
+                      isMine
+                        ? "bg-purple-600 text-white"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
+                    <div className="text-xs font-semibold mb-1">
+                      {isMine
+                        ? "Bạn"
+                        : userList.filter((user) => user.id === msg.sender)[0]
+                            ?.fullName}
+                    </div>
+                    <div className="text-left">{msg.message}</div>
                   </div>
-                  <div className="text-left">{msg.message}</div>
+                  {!isMine && (
+                    <span
+                      className="ml-2 text-[0.65rem] text-gray-500 self-end"
+                      title={dayjs(msg.timestamp).format("HH:mm DD/MM/YYYY")}
+                    >
+                      {dayjs(msg.timestamp).fromNow()}
+                    </span>
+                  )}
                 </div>
-                <span
-                  className="ml-2 text-[0.65rem] text-gray-500"
-                  title={dayjs(msg.timestamp).format("HH:mm DD/MM/YYYY")}
-                >
-                  {dayjs(msg.timestamp).fromNow()}
-                </span>
-              </div>
-            ))
+              );
+            })
           )}
           <div ref={messagesEndRef} />
         </div>
