@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import CreateChatRoomForm from "./CreateChatRoomForm";
 import chatRoomApi from "../api/chatRoomApi";
 
-const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
+const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoomId }) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
 
-  useEffect(() => {    
+  useEffect(() => {
     const fetchChatRooms = () => {
       chatRoomApi
         .getChatRooms()
@@ -36,6 +36,11 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
       });
   };
 
+  const handleChatRoomChanging = (room) => {
+    onSelectRoom(room);
+    onTypeChange("group");
+  };
+
   return (
     <>
       <div className="flex-1 overflow-y-auto">
@@ -49,7 +54,7 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
               className={`p-2 border-2 border-black-300 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
                 selectedRoomId === room.id ? "bg-blue-200" : ""
               }`}
-              onClick={() => onSelectRoom(room.id)}
+              onClick={() => handleChatRoomChanging(room)}
             >
               <div className="font-medium">{room.name}</div>
             </div>

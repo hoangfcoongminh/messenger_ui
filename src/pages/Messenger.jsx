@@ -36,9 +36,12 @@ function Messenger() {
   const handleShowSignup = () => setShowSignup(true);
   const handleShowLogin = () => setShowSignup(false);
 
-  const handleSelectedChat = (type, targetId) => {
+  const handleSelectedChat = (targetId) => {
     setSelected(targetId);
-    setType(type);
+  };
+
+  const handleTypeChange = (newType) => {
+    setType(newType);
   };
 
   const handleLogout = () => {
@@ -73,6 +76,7 @@ function Messenger() {
         <SearchUser />
         <ChatRoomList
           onSelectRoom={handleSelectedChat}
+          onTypeChange={handleTypeChange}
           selectedRoomId={selected}
         />
       </Sidebar>
