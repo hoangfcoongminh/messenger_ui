@@ -12,9 +12,15 @@ const CreateChatRoomForm = ({ onCreate, onCancel }) => {
   }, []);
 
   const fetchUsers = () => {
-    userApi.getUsers().then((response) => {
-      setUserList(response.data);
-    });
+    userApi
+      .getUsers()
+      .then((response) => {
+        setUserList(response.data);
+      })
+      .catch((error) => {
+        toast.error("Lỗi khi tải danh sách người dùng");
+        console.error("Lỗi khi tải danh sách người dùng: ", error);
+      });
   };
 
   const handleToggleMember = (userId) => {

@@ -8,9 +8,15 @@ const SearchUser = () => {
   const handleSearch = (e) => {
     setQuery(e.target.value);
     const payload = { search: e.target.value };
-    userApi.search(payload).then((response) => {
-      setUserList(response.data);
-    });
+    userApi
+      .search(payload)
+      .then((response) => {
+        setUserList(response.data);
+      })
+      .catch((error) => {
+        console.error("Lỗi khi tìm kiếm người dùng: ", error);
+        setUserList([]);
+      });
   };
 
   return (
@@ -34,7 +40,9 @@ const SearchUser = () => {
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-sm">{user.fullName}</span>
-                <span className="text-xs text-left text-gray-500">@{user.username}</span>
+                <span className="text-xs text-left text-gray-500">
+                  @{user.username}
+                </span>
               </div>
             </div>
           ))}

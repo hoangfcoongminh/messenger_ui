@@ -6,15 +6,15 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => {    
     const fetchChatRooms = () => {
       chatRoomApi
         .getChatRooms()
         .then((response) => {
           setChatRooms(response.data);
-          if (response.data.length > 0 && !selectedRoomId) {
-            onSelectRoom(response.data[0].id);
-          }
+          // if (response.data.length > 0 && !selectedRoomId) {
+          //   onSelectRoom(response.data[0].id);
+          // }
         })
         .catch((error) => {
           console.error("Error fetching chat rooms:", error);

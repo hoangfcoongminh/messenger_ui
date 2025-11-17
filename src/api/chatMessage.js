@@ -1,11 +1,15 @@
 import axiosClient from "./axiosClient";
 
 const chatMessageApi = {
-  fetchHistoryMessages: (roomId) => {
-    return axiosClient.get(`/messages/${roomId}`);
+  fetchHistoryMessages: (type, targetId) => {
+    return axiosClient.get('/messages', {
+      params: { type, targetId: targetId }
+    });
   },
-  deleteHistoryMessages: (roomId) => {
-    return axiosClient.delete(`/messages/${roomId}`);
+  deleteHistoryMessages: (type, targetId) => {
+    return axiosClient.delete('/messages', {
+      params: { type, targetId: targetId }
+    });
   },
 };
 

@@ -5,10 +5,11 @@ import chatMessageApi from "../api/chatMessage";
 import userApi from "../api/userApi";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { CONNECT_TYPE } from "../enum/connectType";
 
 dayjs.extend(relativeTime);
 
-const ChatComponent = ({ roomId }) => {
+const ChatComponent = ({ type, targetId }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userList, setUserList] = useState([]);
@@ -16,11 +17,31 @@ const ChatComponent = ({ roomId }) => {
 
   // Khởi tạo kết nối WebSocket khi component mount
   useEffect(() => {
-    console.log("Connecting to WebSocket for roomId: ", roomId);
+    const fetchHistoryMessages = async (type, targetId) => {
+      try {
+        const response = await chatMessageApi.fetchHistoryMessages(
+          type,
+          targetId
+        );
+        setMessages(response.data);
+        const userInGroup = response.data.reduce((acc, msg) => {
+          if (!acc.includes(msg.sender)) {
+            acc.push(msg.sender);
+          }
+          return acc;
+        }, []);
+        if (userInGroup.length) {
+          fetchUsersInGroup(userInGroup);
+        }
+      } catch (error) {
+        toast.error("Lỗi khi tải lịch sử tin nhắn");
+        console.error("Lỗi khi tải lịch sử tin nhắn: ", error);
+      }
+    };
 
-    fetchUsers();
-    fetchHistoryMessages(roomId);
-    connect(roomId, (msg) => {
+    fetchHistoryMessages(type, targetId);
+
+    connect(targetId, (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
@@ -28,7 +49,7 @@ const ChatComponent = ({ roomId }) => {
     return () => {
       disconnect();
     };
-  }, [roomId]);
+  }, [type, targetId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -36,9 +57,9 @@ const ChatComponent = ({ roomId }) => {
     }
   }, [messages]);
 
-  const fetchUsers = () => {
+  const fetchUsersInGroup = (userIds) => {
     userApi
-      .getUsers()
+      .getUsers({ ids: userIds })
       .then((response) => {
         setUserList(response.data);
       })
@@ -48,20 +69,11 @@ const ChatComponent = ({ roomId }) => {
       });
   };
 
-  const fetchHistoryMessages = (id) => {
-    chatMessageApi
-      .fetchHistoryMessages(id)
-      .then((response) => {
-        setMessages(response.data);
-      })
-      .catch((error) => {
-        toast.error("Lỗi khi tải lịch sử tin nhắn");
-        console.error("Lỗi khi tải lịch sử tin nhắn: ", error);
-      });
-  };
-
   const handleSendMessage = () => {
-    sendMessage(roomId, message);
+    userList.length > 1
+      ? sendMessage(CONNECT_TYPE.GROUP, targetId, message)
+      : sendMessage(CONNECT_TYPE.USER, targetId, message);
+
     setMessage("");
   };
 

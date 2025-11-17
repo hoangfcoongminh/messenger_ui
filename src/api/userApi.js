@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
 const userApi = {
-  getUsers: () => axiosClient.get("/users"),
+  getUsers: (payload) => axiosClient.post("/users/get-users-by-ids", payload),
   signup: (payload) => axiosClient.post("/users/signup", payload),
   login: (username) =>
     axiosClient.post(`/users/login?username=${encodeURIComponent(username)}`),
