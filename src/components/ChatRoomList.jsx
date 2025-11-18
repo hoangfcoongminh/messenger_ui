@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import CreateChatRoomForm from "./CreateChatRoomForm";
 import chatRoomApi from "../api/chatRoomApi";
 
-const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoomId }) => {
+const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoom }) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
 
@@ -12,9 +12,9 @@ const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoomId }) => {
         .getChatRooms()
         .then((response) => {
           setChatRooms(response.data);
-          // if (response.data.length > 0 && !selectedRoomId) {
-          //   onSelectRoom(response.data[0].id);
-          // }
+          if (response.data.length > 0 && !selectedRoom) {
+            onSelectRoom(response.data[0]);
+          }
         })
         .catch((error) => {
           console.error("Error fetching chat rooms:", error);
@@ -22,7 +22,7 @@ const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoomId }) => {
     };
 
     fetchChatRooms();
-  }, [onSelectRoom, selectedRoomId]);
+  }, [onSelectRoom, selectedRoom]);
 
   const handleCreateRoom = (roomData) => {
     chatRoomApi
@@ -52,7 +52,7 @@ const ChatRoomList = ({ onSelectRoom, onTypeChange, selectedRoomId }) => {
             <div
               key={room.id}
               className={`p-2 border-2 border-black-300 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
-                selectedRoomId === room.id ? "bg-blue-200" : ""
+                selectedRoom.id === room.id ? "bg-blue-200" : ""
               }`}
               onClick={() => handleChatRoomChanging(room)}
             >

@@ -36,8 +36,8 @@ function Messenger() {
   const handleShowSignup = () => setShowSignup(true);
   const handleShowLogin = () => setShowSignup(false);
 
-  const handleSelectedChat = (targetId) => {
-    setSelected(targetId);
+  const handleSelectedChat = (target) => {
+    setSelected(target);
   };
 
   const handleTypeChange = (newType) => {
@@ -77,13 +77,13 @@ function Messenger() {
         <ChatRoomList
           onSelectRoom={handleSelectedChat}
           onTypeChange={handleTypeChange}
-          selectedRoomId={selected}
+          selectedRoom={selected}
         />
       </Sidebar>
       <main className="flex-1 flex flex-col">
         {/* <ChatRoom room={selectedRoom}> */}
         {/* TODO: Truyền roomId vào ChatComponent để chat theo phòng */}
-        <ChatComponent roomId={selected} />
+        <ChatComponent target={selected} type={type} />
         {/* </ChatRoom> */}
       </main>
     </div>

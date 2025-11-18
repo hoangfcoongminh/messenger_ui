@@ -9,7 +9,7 @@ import { CONNECT_TYPE } from "../enum/connectType";
 
 dayjs.extend(relativeTime);
 
-const ChatComponent = ({ type, targetId }) => {
+const ChatComponent = ({ type, target }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userList, setUserList] = useState([]);
@@ -17,11 +17,11 @@ const ChatComponent = ({ type, targetId }) => {
 
   // Khởi tạo kết nối WebSocket khi component mount
   useEffect(() => {
-    const fetchHistoryMessages = async (type, targetId) => {
+    const fetchHistoryMessages = async (type, target) => {
       try {
         const response = await chatMessageApi.fetchHistoryMessages(
           type,
-          targetId
+          target
         );
         setMessages(response.data);
         const userInGroup = response.data.reduce((acc, msg) => {
@@ -38,10 +38,11 @@ const ChatComponent = ({ type, targetId }) => {
         console.error("Lỗi khi tải lịch sử tin nhắn: ", error);
       }
     };
+    console.log("type, target: ", type, target);
+    
+    fetchHistoryMessages(type, target);
 
-    fetchHistoryMessages(type, targetId);
-
-    connect(targetId, (msg) => {
+    connect(target, (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
@@ -49,7 +50,7 @@ const ChatComponent = ({ type, targetId }) => {
     return () => {
       disconnect();
     };
-  }, [type, targetId]);
+  }, [type, target]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -71,8 +72,8 @@ const ChatComponent = ({ type, targetId }) => {
 
   const handleSendMessage = () => {
     userList.length > 1
-      ? sendMessage(CONNECT_TYPE.GROUP, targetId, message)
-      : sendMessage(CONNECT_TYPE.USER, targetId, message);
+      ? sendMessage(CONNECT_TYPE.GROUP, target, message)
+      : sendMessage(CONNECT_TYPE.USER, target, message);
 
     setMessage("");
   };
