@@ -5,11 +5,13 @@ import chatRoomApi from "../api/chatRoomApi";
 const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
+  const [type, setType] = useState(null);
 
   useEffect(() => {
     const fetchChatRooms = () => {
+      
       chatRoomApi
-        .getChatRooms()
+        .getChatRooms(type)
         .then((response) => {
           setChatRooms(response.data);
           if (response.data.length > 0 && !selectedRoomId) {
@@ -22,7 +24,7 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
     };
 
     fetchChatRooms();
-  }, [onSelectRoom, selectedRoomId]);
+  }, [onSelectRoom, selectedRoomId, type]);
 
   const handleCreateRoom = (roomData) => {
     chatRoomApi

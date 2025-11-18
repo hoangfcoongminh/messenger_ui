@@ -1,7 +1,9 @@
 import axiosClient from "./axiosClient";
 
 const chatRoomApi = {
-  getChatRooms: () => axiosClient.get("/chat-rooms"),
+  getChatRooms: (type) => axiosClient.get("/chat-rooms", {
+    params: { type }
+  }),
   createChatRoom: (payload) => axiosClient.post("/chat-rooms", payload),
 };
 
