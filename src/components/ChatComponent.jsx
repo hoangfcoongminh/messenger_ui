@@ -8,7 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const ChatComponent = ({ roomId }) => {
+const ChatComponent = ({ room }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [userList, setUserList] = useState([]);
@@ -16,11 +16,11 @@ const ChatComponent = ({ roomId }) => {
 
   // Khởi tạo kết nối WebSocket khi component mount
   useEffect(() => {
-    console.log("Connecting to WebSocket for roomId: ", roomId);
+    console.log("Connecting to WebSocket for room: ", room);
 
     fetchUsers();
-    fetchHistoryMessages(roomId);
-    connect(roomId, (msg) => {
+    fetchHistoryMessages(room.id);
+    connect(room.id, (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
@@ -28,7 +28,7 @@ const ChatComponent = ({ roomId }) => {
     return () => {
       disconnect();
     };
-  }, [roomId]);
+  }, [room]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -61,7 +61,7 @@ const ChatComponent = ({ roomId }) => {
   };
 
   const handleSendMessage = () => {
-    sendMessage(roomId, message);
+    sendMessage(room, message);
     setMessage("");
   };
 
@@ -69,7 +69,7 @@ const ChatComponent = ({ roomId }) => {
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200">
       <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-purple-700 mb-4 text-center">
-          WebSocket Chat
+          {room.name}
         </h2>
         <div className="flex flex-col h-[32rem] border rounded-lg bg-gray-50 p-6 mb-4 overflow-y-auto">
           {messages.length === 0 ? (

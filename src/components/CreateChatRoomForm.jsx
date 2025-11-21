@@ -1,6 +1,7 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import userApi from "../api/userApi";
 import { toast } from "react-toastify";
+import ChatRoomType from "../enums/chatRoomType";
 
 const CreateChatRoomForm = ({ onCreate, onCancel }) => {
   const [roomName, setRoomName] = useState("");
@@ -28,7 +29,7 @@ const CreateChatRoomForm = ({ onCreate, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (roomName.trim() && selectedMembers.length > 1) {
-      onCreate({ name: roomName.trim(), members: selectedMembers });
+      onCreate({ name: roomName.trim(), chatRoomType: ChatRoomType.GROUP, members: selectedMembers });
       setRoomName("");
       setSelectedMembers([]);
     } else {

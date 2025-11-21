@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import CreateChatRoomForm from "./CreateChatRoomForm";
 import chatRoomApi from "../api/chatRoomApi";
+import ChatRoomType from "../enums/chatRoomType";
 
-const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
+const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
+  const [type, setType] = useState("all");
 
   useEffect(() => {
-    const fetchChatRooms = () => {
+    const fetchChatRooms = (typeValue) => {
       chatRoomApi
-        .getChatRooms()
+        .getChatRooms(typeValue === "all" ? null : typeValue)
         .then((response) => {
           setChatRooms(response.data);
-          if (response.data.length > 0 && !selectedRoomId) {
-            onSelectRoom(response.data[0].id);
+          if (response.data.length > 0 && !selectedRoom) {
+            onSelectRoom(response.data[0]);
           }
         })
         .catch((error) => {
@@ -21,8 +23,8 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
         });
     };
 
-    fetchChatRooms();
-  }, [onSelectRoom, selectedRoomId]);
+    fetchChatRooms(type);
+  }, [onSelectRoom, selectedRoom, type]);
 
   const handleCreateRoom = (roomData) => {
     chatRoomApi
@@ -39,7 +41,18 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
   return (
     <>
       <div className="flex-1 overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-2">Phòng chat của bạn</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold">Phòng chat của bạn</h3>
+          <select
+            className="px-2 py-1 border rounded-lg text-sm bg-white"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="all">Tất cả</option>
+            <option value={ChatRoomType.PRIVATE}>Bạn bè</option>
+            <option value={ChatRoomType.GROUP}>Nhóm</option>
+          </select>
+        </div>
         {chatRooms.length === 0 ? (
           <div className="text-gray-400">Chưa có phòng chat nào</div>
         ) : (
@@ -47,9 +60,9 @@ const ChatRoomList = ({ onSelectRoom, selectedRoomId }) => {
             <div
               key={room.id}
               className={`p-2 border-2 border-black-300 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
-                selectedRoomId === room.id ? "bg-blue-200" : ""
+                selectedRoom.id === room.id ? "bg-blue-200" : ""
               }`}
-              onClick={() => onSelectRoom(room.id)}
+              onClick={() => onSelectRoom(room)}
             >
               <div className="font-medium">{room.name}</div>
             </div>

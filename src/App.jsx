@@ -11,7 +11,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const [fullName, setFullName] = useState("");
   const [showSignup, setShowSignup] = useState(false);
 
@@ -38,15 +38,17 @@ function App() {
   const handleShowSignup = () => setShowSignup(true);
   const handleShowLogin = () => setShowSignup(false);
 
-  const handleSelectRoom = (roomId) => {
-    setSelectedRoomId(roomId);
+  const handleSelectRoom = (room) => {
+    setSelectedRoom(room);
+    console.log("Selected room: ", room);
+    
   };
 
   const handleLogout = () => {
     localStorage.removeItem("fullName");
     localStorage.removeItem("uid");
     setFullName("");
-    setSelectedRoomId(null);
+    setSelectedRoom(null);
   };
 
   if (!fullName) {
@@ -72,16 +74,16 @@ function App() {
             Đăng xuất
           </button>
         </div>
-        <SearchUser />
+        <SearchUser onSelect={handleSelectRoom} />
         <ChatRoomList
           onSelectRoom={handleSelectRoom}
-          selectedRoomId={selectedRoomId}
+          selectedRoom={selectedRoom}
         />
       </Sidebar>
       <main className="flex-1 flex flex-col">
         {/* <ChatRoom room={selectedRoom}> */}
         {/* TODO: Truyền roomId vào ChatComponent để chat theo phòng */}
-        <ChatComponent roomId={selectedRoomId} />
+        <ChatComponent room={selectedRoom} />
         {/* </ChatRoom> */}
       </main>
     </div>

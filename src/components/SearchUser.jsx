@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import userApi from "../api/userApi";
 
-const SearchUser = () => {
+const SearchUser = ({onSelect}) => {
   const [query, setQuery] = useState("");
   const [userList, setUserList] = useState([]);
 
@@ -27,6 +27,7 @@ const SearchUser = () => {
           {userList.map((user) => (
             <div
               key={user.id}
+              onClick={() => onSelect(user)}
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 transition mb-1"
             >
               <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700">
