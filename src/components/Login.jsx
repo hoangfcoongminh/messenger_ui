@@ -13,7 +13,6 @@ const Login = ({ onLogin, onShowSignup }) => {
     setError("");
     try {
       const response = await userApi.login(username.trim());
-      console.log("Response: ", response.data);
 
       // Giả sử response.data.uid là uid trả về từ backend
       const uid = response.data.id;

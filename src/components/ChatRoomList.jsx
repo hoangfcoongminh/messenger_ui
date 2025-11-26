@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import CreateChatRoomForm from "./CreateChatRoomForm";
 import chatRoomApi from "../api/chatRoomApi";
+import userApi from "../api/userApi";
 import ChatRoomType from "../enums/chatRoomType";
 
 const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
   const [chatRooms, setChatRooms] = useState([]);
+  const [userList, setUserList] = useState([]);
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
   const [type, setType] = useState("all");
 
@@ -22,9 +24,19 @@ const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
           console.error("Error fetching chat rooms:", error);
         });
     };
-
     fetchChatRooms(type);
   }, [onSelectRoom, selectedRoom, type]);
+
+  useEffect(() => {
+    userApi
+      .getUsers()
+      .then((response) => {
+        setUserList(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  }, []);
 
   const handleCreateRoom = (roomData) => {
     chatRoomApi
@@ -35,6 +47,25 @@ const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
       })
       .catch((error) => {
         console.error("Error creating chat room:", error);
+      });
+  };
+
+  const handleChatWithUser = (user) => {
+    const payload = { name: user.fullName, chatRoomType: ChatRoomType.PRIVATE, members: [user.id] };
+    chatRoomApi
+      .createChatRoom(payload)
+      .then((response) => {
+        const room = response.data;
+        setUserList((prev) => {
+          if (!prev.some((r) => r.id === room.id)) {
+            return [...prev, room];
+          }
+          return prev;
+        });
+        onSelectRoom(room);
+      })
+      .catch((error) => {
+        console.error("Error getting/creating private room:", error);
       });
   };
 
@@ -60,7 +91,7 @@ const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
             <div
               key={room.id}
               className={`p-2 border-2 border-black-300 rounded-lg cursor-pointer mb-2 hover:bg-blue-100 transition ${
-                selectedRoom.id === room.id ? "bg-blue-200" : ""
+                selectedRoom?.id === room.id ? "bg-blue-200" : ""
               }`}
               onClick={() => onSelectRoom(room)}
             >
@@ -68,6 +99,22 @@ const ChatRoomList = ({ onSelectRoom, selectedRoom }) => {
             </div>
           ))
         )}
+        <div className="mt-6">
+          <h4 className="text-md font-semibold mb-2">Người dùng</h4>
+          {userList.length === 0 ? (
+            <div className="text-gray-400">Không có người dùng nào</div>
+          ) : (
+            userList.map((user) => (
+              <div
+                key={user.id}
+                className="p-2 border rounded-lg cursor-pointer mb-2 hover:bg-green-100 transition"
+                onClick={() => handleChatWithUser(user)}
+              >
+                <div className="font-medium">{user.fullName}</div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
       <div className="mt-4">
         <button

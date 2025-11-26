@@ -18,16 +18,18 @@ const ChatComponent = ({ room }) => {
   useEffect(() => {
     console.log("Connecting to WebSocket for room: ", room);
 
-    fetchUsers();
-    fetchHistoryMessages(room.id);
-    connect(room.id, (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]);
-    });
+    if (room) {
+      fetchUsers();
+      fetchHistoryMessages(room.id);
+      connect(room.id, (msg) => {
+        setMessages((prevMessages) => [...prevMessages, msg]);
+      });
 
-    // Ngắt kết nối khi component unmount
-    return () => {
-      disconnect();
-    };
+      // Ngắt kết nối khi component unmount
+      return () => {
+        disconnect();
+      };
+    }
   }, [room]);
 
   useEffect(() => {
@@ -61,15 +63,27 @@ const ChatComponent = ({ room }) => {
   };
 
   const handleSendMessage = () => {
-    sendMessage(room, message);
+    sendMessage(room.id, message);
     setMessage("");
   };
+
+  if (!room) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200">
+        <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 flex items-center justify-center">
+          <span className="text-xl text-gray-500">
+            Vui lòng chọn phòng chat
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200">
       <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-purple-700 mb-4 text-center">
-          {room.name}
+          {room?.name || room?.fullName || "Phòng chat"}
         </h2>
         <div className="flex flex-col h-[32rem] border rounded-lg bg-gray-50 p-6 mb-4 overflow-y-auto">
           {messages.length === 0 ? (

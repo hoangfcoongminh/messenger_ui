@@ -27,6 +27,7 @@ export const sendMessage = (roomId, message) => {
   }
   const sender = localStorage.getItem("uid");
   const chatMessage = { roomId, sender, message };
+  console.log("Sending message: ", chatMessage);
   
   stompClient.publish({
     destination: "/app/sendMessage",
